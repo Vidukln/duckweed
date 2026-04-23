@@ -3,15 +3,10 @@ import cv2
 import pickle
 from sklearn.mixture import GaussianMixture
 
-# =========================
-# LOAD MODEL
-# =========================
+#LOAD MODEL
 with open("gmm_model.pkl", "rb") as f:
     model = pickle.load(f)
 
-# =========================
-# CONFIG (from your research setup)
-# =========================
 LENS_TO_WATER_MM = 297
 ROI_SIZE_MM = 183
 
@@ -19,9 +14,7 @@ L = LENS_TO_WATER_MM / 1000.0
 ROI = ROI_SIZE_MM / 1000.0
 
 
-# =========================
-# FLARE DETECTION
-# =========================
+#FLARE DETECTION
 def detect_flare(img):
     hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     H, S, V = hsv[:, :, 0], hsv[:, :, 1], hsv[:, :, 2]
@@ -31,10 +24,6 @@ def detect_flare(img):
 
     return bright & low_sat
 
-
-# =========================
-# CAMERA GEOMETRY MODEL
-# =========================
 def camera_projection_model(h, w):
     fx = w / ROI
     fy = h / ROI
@@ -53,10 +42,6 @@ def camera_projection_model(h, w):
 
     return np.clip(cos_theta, 0.2, 1.0)
 
-
-# =========================
-# MAIN ANALYSIS FUNCTION
-# =========================
 def analyze_image(image):
 
     img = image.copy()
@@ -73,9 +58,6 @@ def analyze_image(image):
 
     means = model.means_
 
-    # =========================
-    # CLASS SELECTION
-    # =========================
     def green_score(m):
         R, G, B = m
         return G - 0.5 * (R + B)
@@ -91,40 +73,25 @@ def analyze_image(image):
     flare_mask_optical = detect_flare(img)
     flare_mask = flare_mask_gmm | flare_mask_optical
 
-    # =========================
-    # WEIGHTING
-    # =========================
     W = prob_map[:, :, green_idx]
     W = W / (np.max(W) + 1e-8)
 
-    # Geometry correction
+    #Geometry correction
     cos_theta = camera_projection_model(h, w)
     W_geo = W / cos_theta
     W_geo = W_geo / (np.max(W_geo) + 1e-8)
 
-    # =========================
-    # UNCERTAINTY
-    # =========================
     uncertainty = 1 - np.max(prob_map, axis=2)
 
-    # =========================
-    # PHYSICAL AREA
-    # =========================
     ROI_area = ROI * ROI
     pixel_area = ROI_area / (h * w)
 
     hard_area = np.sum(green_mask) * pixel_area
     weighted_area = np.sum(W_geo) * pixel_area
 
-    # =========================
-    # BLOBS
-    # =========================
     num_labels, _ = cv2.connectedComponents(green_mask.astype(np.uint8))
     blobs = num_labels - 1
 
-    # =========================
-    # VISUALIZATION
-    # =========================
     overlay = img.copy()
 
     overlay[green_mask] = [0, 255, 0]
