@@ -9,9 +9,6 @@ st.title("🌿 Duckweed Physics-Aware Analyzer")
 
 mode = st.radio("Select Mode", ["Single Image", "Multiple Images"])
 
-# =========================
-# SINGLE IMAGE MODE
-# =========================
 if mode == "Single Image":
 
     uploaded_file = st.file_uploader("Upload Image", type=["png", "jpg", "jpeg"])
@@ -45,9 +42,6 @@ if mode == "Single Image":
         c4.metric("Flare Ratio", f"{result['flare_ratio']:.3f}")
 
 
-# =========================
-# MULTIPLE IMAGE MODE
-# =========================
 else:
 
     uploaded_files = st.file_uploader(
@@ -81,9 +75,7 @@ else:
             with col3:
                 st.image(result["uncertainty"], caption="Uncertainty Map", use_container_width=True)
 
-            # =========================
-            # PER IMAGE METRICS (FIXED)
-            # =========================
+            
             m1, m2, m3, m4 = st.columns(4)
 
             m1.metric("Hard Area (m²)", f"{result['hard_area']:.6f}")
@@ -100,9 +92,7 @@ else:
                 result["flare_ratio"]
             ])
 
-        # =========================
-        # SUMMARY ACROSS ALL IMAGES
-        # =========================
+        
         all_results = np.array(all_results)
 
         st.subheader("📊 Batch Summary")
