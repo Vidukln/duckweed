@@ -5,7 +5,7 @@ from model import analyze_image
 
 st.set_page_config(page_title="Duckweed Physics Analyzer", layout="wide")
 
-st.title("🌿 Duckweed Physics-Aware Analyzer")
+st.title("Duckweed Physics-Aware Analyzer")
 
 mode = st.radio("Select Mode", ["Single Image", "Multiple Images"])
 
@@ -95,7 +95,7 @@ else:
         
         all_results = np.array(all_results)
 
-        st.subheader("📊 Batch Summary")
+        st.subheader("Batch Summary")
 
         s1, s2, s3, s4 = st.columns(4)
 
